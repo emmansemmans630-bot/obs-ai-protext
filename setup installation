@@ -1,0 +1,15 @@
+# OBS Overlay Pro Suite — Setup Guide
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ installed
+- OBS Studio 28+ installed
+- obs-browser plugin (comes built-in with OBS 28+)
+
+### 1. Install the Server & Dashboard
+
+```bash
+git clone <your-repo>/obs-overlay-pro
+cd obs-overlay-pro
+npm install

@@ -1,0 +1,67 @@
+import React, { useEffect, useState } from 'react';
+import { OverlayRenderer } from './components/OverlayRenderer';
+import { connectWebSocket, addMessageHandler } from './lib/websocket';
+
+export default function OverlayPage() {
+  const [state, setState] = useState({
+    isVisible: false,
+    content: null,
+    liveCaption: null,
+    settings: {
+      layout: 'lower-third',
+      fontSize: 36,
+      fontFamily: 'Inter, sans-serif',
+      transition: 'fade',
+      primaryColor: '#003366',
+      secondaryColor: '#006633',
+      textColor: '#ffffff',
+      backgroundColor: '#000000',
+      opacity: 0.85,
+      animationSpeed: 400,
+      textAlign: 'center',
+      showVerseRef: true,
+      backgroundBlur: 0,
+    },
+  });
+
+  useEffect(() => {
+    const cleanup = connectWebSocket(
+      // onStateUpdate
+      (newState) => {
+        setState(prev => ({
+          ...prev,
+          isVisible: newState.isVisible ?? prev.isVisible,
+          content: newState.content ?? prev.content,
+          settings: { ...prev.settings, ...newState.settings },
+        }));
+      },
+      // onLiveCaption
+      (caption) => {
+        setState(prev => ({ ...prev, liveCaption: caption }));
+      }
+    );
+
+    // Add message handler for direct updates
+    const removeHandler = addMessageHandler((msg) => {
+      if (msg.type === 'STATE_UPDATE') {
+        setState(prev => ({
+          ...prev,
+          isVisible: msg.payload.isVisible ?? prev.isVisible,
+          content: msg.payload.content ?? prev.content,
+          settings: { ...prev.settings, ...msg.payload.settings },
+        }));
+      }
+    });
+
+    return () => {
+      cleanup?.();
+      removeHandler?.();
+    };
+  }, []);
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: 'transparent' }}>
+      <OverlayRenderer state={state} />
+    </div>
+  );
+}

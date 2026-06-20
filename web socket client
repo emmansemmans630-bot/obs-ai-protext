@@ -1,0 +1,90 @@
+// WebSocket client for connecting the dashboard to the overlay server
+const WS_URL = process.env.VITE_WS_URL || `ws://localhost:3456`;
+
+let ws = null;
+let reconnectTimer = null;
+let messageHandlers = new Set();
+
+export function connectWebSocket(onStateUpdate, onLiveCaption, onError) {
+  if (ws && ws.readyState === WebSocket.OPEN) return;
+
+  function connect() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      console.log('✅ Connected to overlay server');
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        switch (msg.type) {
+          case 'STATE_UPDATE':
+            onStateUpdate?.(msg.payload);
+            break;
+          case 'LIVE_CAPTION':
+            onLiveCaption?.(msg.payload);
+            break;
+          case 'ERROR':
+            onError?.(msg.payload);
+            break;
+          case 'PONG':
+            break;
+          default:
+            break;
+        }
+        messageHandlers.forEach((handler) => handler(msg));
+      } catch (e) {
+        console.error('WebSocket parse error:', e);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('❌ Disconnected from server. Reconnecting in 3s...');
+      reconnectTimer = setTimeout(connect, 3000);
+    };
+
+    ws.onerror = (err) => {
+      console.error('WebSocket error:', err);
+    };
+  }
+
+  connect();
+
+  return () => {
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+  };
+}
+
+export function sendMessage(type, payload) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type, payload }));
+  } else {
+    console.warn('WebSocket not connected, cannot send message');
+  }
+}
+
+export function addMessageHandler(handler) {
+  messageHandlers.add(handler);
+  return () => messageHandlers.delete(handler);
+}
+
+// Convenience methods
+export const showOverlay = (content) => sendMessage('SHOW_OVERLAY', content);
+export const hideOverlay = () => sendMessage('HIDE_OVERLAY', {});
+export const updateSettings = (settings) => sendMessage('UPDATE_SETTINGS', settings);
+export const showScripture = (version, reference) => sendMessage('SHOW_SCRIPTURE', { version, reference });
+export const showCaption = (text, language) => sendMessage('SHOW_CAPTION', { text, language });
+export const showSong = (title, text) => sendMessage('SHOW_SONG', { title, text });
+export const sendLiveCaption = (text, isFinal, language) => sendMessage('LIVE_CAPTION', { text, isFinal, language });

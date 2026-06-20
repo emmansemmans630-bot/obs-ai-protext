@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBS Overlay Pro — Browser Source</title>
+<style>
+  /* === OVERLAY RESET === */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { 
+    width: 1920px; 
+    height: 1080px; 
+    overflow: hidden; 
+    background: transparent;
+    font-family: 'Inter', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Ethiopic', sans-serif;
+  }
+
+  /* === CORE VARIABLES

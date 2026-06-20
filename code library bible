@@ -1,0 +1,120 @@
+// 10 Featured Bible versions for the dropdown (available for Africa & Europe)
+export const BIBLE_VERSIONS = [
+  // English (Global)
+  { id: 'KJV', name: 'King James Version', language: 'English' },
+  { id: 'NIV', name: 'New International Version', language: 'English' },
+  { id: 'ESV', name: 'English Standard Version', language: 'English' },
+  { id: 'NLT', name: 'New Living Translation', language: 'English' },
+  { id: 'NASB', name: 'New American Standard Bible', language: 'English' },
+  { id: 'WEB', name: 'World English Bible', language: 'English' },
+  
+  // French (Europe, West/Central Africa)
+  { id: 'LSG', name: 'Louis Segond (Français)', language: 'Français' },
+  { id: 'BDS', name: 'Bible du Semeur (Français)', language: 'Français' },
+  
+  // Portuguese (Europe, Southern Africa)
+  { id: 'ARA', name: 'Almeida Revista (Português)', language: 'Português' },
+  { id: 'NVI', name: 'Nova Versão Internacional (Português)', language: 'Português' },
+  
+  // Spanish (Europe, North Africa)
+  { id: 'RVR1960', name: 'Reina-Valera 1960 (Español)', language: 'Español' },
+  { id: 'NTV', name: 'Nueva Traducción Viviente (Español)', language: 'Español' },
+  
+  // German (Europe)
+  { id: 'LUTH1545', name: 'Lutherbibel (Deutsch)', language: 'Deutsch' },
+  { id: 'SCH2000', name: 'Schlachter 2000 (Deutsch)', language: 'Deutsch' },
+  
+  // Italian (Europe)
+  { id: 'NR1994', name: 'Nuova Riveduta (Italiano)', language: 'Italiano' },
+  
+  // Dutch (Europe)
+  { id: 'NBG51', name: 'Nieuwe Vertaling (Nederlands)', language: 'Nederlands' },
+  
+  // African Languages
+  { id: 'SWAHILI', name: 'Biblia Takatifu (Kiswahili)', language: 'Kiswahili' },
+  { id: 'YORUBA', name: 'Bibeli Mimo (Yorùbá)', language: 'Yorùbá' },
+  { id: 'ZULU', name: 'IBhayibheli (isiZulu)', language: 'isiZulu' },
+  { id: 'HAUSA', name: 'Littafi Mai Tsarki (Hausa)', language: 'Hausa' },
+  { id: 'AMHARIC', name: 'መጽሐፍ ቅዱስ (አማርኛ)', language: 'አማርኛ' },
+  { id: 'TWI', name: 'Twi Bible (Twi)', language: 'Twi' },
+  { id: 'IGBO', name: 'Baịbụlụ Nsọ (Igbo)', language: 'Igbo' },
+  { id: 'LINGALA', name: 'Biblia ya Lingala (Lingála)', language: 'Lingála' },
+  { id: 'XHOSA', name: 'IBhayibhile (isiXhosa)', language: 'isiXhosa' },
+  
+  // Arabic (North Africa)
+  { id: 'NAV', name: 'Ketab El Hayat (العربية)', language: 'العربية' },
+];
+
+// Quick-access popular verses embedded for instant display (no network delay)
+export const QUICK_SCRIPTURES = {
+  'John 3:16': {
+    kjv: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
+    esv: 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.',
+    lsg: 'Car Dieu a tant aimé le monde qu\'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu\'il ait la vie éternelle.',
+    swahili: 'Kwa maana jinsi hivi Mungu aliupenda ulimwengu, hata akamtoa Mwanawe pekee, ili kila mtu amwaminiye asipotee, bali awe na uzima wa milele.',
+    yoruba: 'Nítorí ti Ọlọ́run fẹ́ràn ayé tó bẹ́ẹ̀ tí ó fi jọ̀wọ́ Ọmọ rẹ̀ kan ṣoṣo nítorí pé ẹnikẹ́ni tí ó bá gbà á gbọ́ kì yóò ṣègbé ṣùgbọ́n yóò ní ìyè àìnípẹ̀kun.',
+  },
+  'Psalm 23:1': {
+    kjv: 'The Lord is my shepherd; I shall not want.',
+    esv: 'The Lord is my shepherd; I shall not want.',
+    lsg: 'L\'Éternel est mon berger: je ne manquerai de rien.',
+    swahili: 'Bwana ndiye mchungaji wangu, sitapungukiwa na kitu.',
+  },
+  'Philippians 4:13': {
+    kjv: 'I can do all things through Christ which strengtheneth me.',
+    esv: 'I can do all things through him who strengthens me.',
+    lsg: 'Je puis tout par celui qui me fortifie.',
+  },
+  'Genesis 1:1': {
+    kjv: 'In the beginning God created the heaven and the earth.',
+    lsg: 'Au commencement, Dieu créa les cieux et la terre.',
+  },
+  'Romans 8:28': {
+    kjv: 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.',
+    esv: 'And we know that for those who love God all things work together for good, for those who are called according to his purpose.',
+  },
+  'Jeremiah 29:11': {
+    kjv: 'For I know the thoughts that I think toward you, saith the Lord, thoughts of peace, and not of evil, to give you an expected end.',
+    esv: 'For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.',
+  },
+};
+
+// Default overlay text mappings by language
+export const OVERLAY_LABELS = {
+  en: { song: 'Song', scripture: 'Scripture', caption: 'Caption' },
+  fr: { song: 'Chant', scripture: 'Écriture', caption: 'Sous-titre' },
+  pt: { song: 'Cântico', scripture: 'Escritura', caption: 'Legenda' },
+  es: { song: 'Canción', scripture: 'Escritura', caption: 'Subtítulo' },
+  de: { song: 'Lied', scripture: 'Schrift', caption: 'Untertitel' },
+  it: { song: 'Canto', scripture: 'Scrittura', caption: 'Sottotitolo' },
+  nl: { song: 'Lied', scripture: 'Schrift', caption: 'Onderschrift' },
+  sw: { song: 'Wimbo', scripture: 'Maandiko', caption: 'Maelezo' },
+  yo: { song: 'Orin', scripture: 'Ìwé Mímọ́', caption: 'Àkọlé' },
+  zu: { song: 'Ingoma', scripture: 'IsaLathiso', caption: 'Umbhalo' },
+  ha: { song: 'Waƙa', scripture: 'Nassi', caption: 'Bayanin' },
+  am: { song: 'ዝማሬ', scripture: 'ቅዱስ መጽሐፍ', caption: 'መግለጫ' },
+  ar: { song: 'ترنيمة', scripture: 'الكتاب المقدس', caption: 'شرح' },
+};
+
+export function getScripture(reference, version = 'KJV') {
+  const quickRef = QUICK_SCRPTURES[reference];
+  if (quickRef) {
+    const versionKey = version.toLowerCase();
+    const langText = quickRef[versionKey] || quickRef['kjv'];
+    return {
+      text: langText || quickRef['kjv'],
+      reference,
+      version,
+    };
+  }
+  
+  // For non-quick scriptures, return a fetch instruction
+  return {
+    needsFetch: true,
+    reference,
+    version,
+  };
+}
+
+// Fix the typo in the above export
+export { QUICK_SCRPTURES as QUICK_SCRIPTURES };

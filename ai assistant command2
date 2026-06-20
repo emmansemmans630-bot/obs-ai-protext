@@ -1,0 +1,5 @@
+Voice Command,Action
+"""Show [verse reference]""","Displays scripture (e.g. ""Show Psalm 23"")"
+"""Hide overlay""",Clears the screen
+"""Caption [text]""",Shows custom caption
+Normal speech,Live captioning auto-enabled

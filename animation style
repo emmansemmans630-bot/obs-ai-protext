@@ -1,0 +1,277 @@
+/* OBS Overlay Pro Suite — Complete Animation System */
+
+/* Base overlay dimensions */
+.overlay-container {
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+  z-index: 1000;
+  font-family: var(--font-family, 'Inter', sans-serif);
+  transition: all var(--anim-speed, 400ms) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Full-screen layout */
+.overlay-container.full-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Lower-third layout */
+.overlay-container.lower-third {
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  padding: 0 20px;
+}
+
+/* Backdrop */
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  transition: all var(--anim-speed) ease;
+}
+
+.full-screen .overlay-backdrop {
+  border-radius: 0;
+}
+
+/* Content positioning */
+.overlay-content {
+  position: relative;
+  z-index: 2;
+  padding: 24px 32px;
+  text-align: var(--text-align, center);
+  color: var(--text-color, #ffffff);
+}
+
+/* === SCRIPTURE STYLING === */
+.scripture-container {
+  position: relative;
+  padding: 20px 0;
+}
+
+.scripture-verse-icon {
+  position: absolute;
+  top: -10px;
+  left: var(--text-align) === 'center' ? '50%' : '0';
+  transform: translateX(-50%);
+  opacity: 0.3;
+  width: 48px;
+  height: 48px;
+}
+
+.scripture-text {
+  font-size: var(--font-size, 36px);
+  line-height: 1.5;
+  font-weight: 500;
+  quotes: "“" "”" "‘" "’";
+  margin: 0;
+  padding: 0;
+  max-width: 900px;
+  margin: 0 auto;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.scripture-text::before {
+  content: "“";
+  font-size: 1.2em;
+  opacity: 0.6;
+  margin-right: 4px;
+}
+
+.scripture-text::after {
+  content: "”";
+  font-size: 1.2em;
+  opacity: 0.6;
+  margin-left: 4px;
+}
+
+.scripture-reference {
+  margin-top: 16px;
+  font-size: calc(var(--font-size, 36px) * 0.45);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.reference-divider {
+  display: inline-block;
+  width: 30px;
+  height: 2px;
+  background: var(--accent-color, var(--secondary, #006633));
+  border-radius: 1px;
+}
+
+.version-label {
+  font-size: 0.7em;
+  opacity: 0.6;
+  font-weight: 400;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+
+/* === SONG LYRICS STYLING === */
+.song-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.song-title {
+  font-size: calc(var(--font-size, 36px) * 0.6);
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent-color, var(--secondary, #006633));
+  display: inline-block;
+}
+
+.song-lyrics {
+  font-size: var(--font-size, 36px);
+  line-height: 1.6;
+  font-weight: 400;
+  white-space: pre-line;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* === CAPTION STYLING === */
+.caption-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 85%;
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  z-index: 3;
+}
+
+.caption-container.standalone {
+  position: relative;
+  bottom: auto;
+  transform: none;
+  margin: 0 auto;
+}
+
+.caption-text {
+  font-size: calc(var(--font-size, 36px) * 0.6);
+  line-height: 1.4;
+  font-weight: 400;
+  text-align: center;
+}
+
+/* === TRANSITION ANIMATIONS === */
+
+/* Fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.animate-fade-in { animation: fadeIn var(--anim-speed, 400ms) ease forwards; }
+.animate-fade-out { animation: fadeOut var(--anim-speed, 400ms) ease forwards; }
+
+/* Slide Up/Down */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideDown {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+.animate-slide-up { animation: slideUp var(--anim-speed, 400ms) cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-slide-down { animation: slideDown var(--anim-speed, 400ms) cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* Slide Left/Right */
+@keyframes slideLeft {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+.animate-slide-left { animation: slideLeft var(--anim-speed, 400ms) cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-slide-right { animation: slideRight var(--anim-speed, 400ms) cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* Zoom */
+@keyframes zoomIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes zoomOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.5); opacity: 0; }
+}
+.animate-zoom-in { animation: zoomIn var(--anim-speed, 400ms) cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-zoom-out { animation: zoomOut var(--anim-speed, 400ms) cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+/* Bounce */
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.08); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bounceOut {
+  0% { transform: scale(1); opacity: 1; }
+  20% { transform: scale(1.08); }
+  100% { transform: scale(0.3); opacity: 0; }
+}
+.animate-bounce-in { animation: bounceIn 600ms cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
+.animate-bounce-out { animation: bounceOut 400ms ease forwards; }
+
+/* Glow */
+@keyframes glowIn {
+  from { opacity: 0; filter: blur(10px) brightness(0.5); }
+  to { opacity: 1; filter: blur(0) brightness(1); }
+}
+@keyframes glowOut {
+  from { opacity: 1; filter: blur(0) brightness(1); }
+  to { opacity: 0; filter: blur(10px) brightness(0.5); }
+}
+.animate-glow-in { animation: glowIn 600ms ease forwards; }
+.animate-glow-out { animation: glowOut 400ms ease forwards; }
+
+/* Pulse attention */
+@keyframes pulseAttention {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.overlay-container.visible .scripture-text,
+.overlay-container.visible .song-title {
+  animation: pulseAttention 2s ease-in-out 1;
+}
+
+/* === RESPONSIVE FONT SCALING === */
+@media (max-width: 800px) {
+  .overlay-content {
+    padding: 16px 20px;
+  }
+  .scripture-text {
+    font-size: calc(var(--font-size, 36px) * 0.75) !important;
+  }
+  .song-lyrics {
+    font-size: calc(var(--font-size, 36px) * 0.75) !important;
+  }
+}
+
+/* === OBS-SPECIFIC: Prevent flicker === */
+.overlay-container { will-change: transform, opacity; backface-visibility: hidden; }

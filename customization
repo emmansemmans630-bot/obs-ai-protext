@@ -1,0 +1,8 @@
+Setting,Options
+Layout,"Lower-third, Full Screen"
+Font Size,12px – 72px slider
+Transitions,"None, Fade, Slide, Zoom, Glow, Bounce"
+Animation Speed,100ms – 1000ms
+Colors,"Primary, Accent, Text (hex pickers)"
+Background,Opacity slider + Blur effect
+Font,"Inter, Noto Sans, or custom"

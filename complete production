@@ -1,0 +1,21 @@
+
+---
+
+This is a complete, production-ready OBS overlay plugin system. Here's a summary of everything it delivers:
+
+| Feature | Implementation |
+|---------|----------------|
+| **10+ Bible versions** | KJV, NIV, ESV, NLT, NASB, WEB, LSG (French), ARA (Portuguese), RVR1960 (Spanish), Swahili, Yoruba, Zulu, Hausa, Amharic, Arabic + more via API fallback |
+| **European languages** | English, French, German, Italian, Spanish, Portuguese, Dutch |
+| **African languages** | Swahili, Yoruba, Zulu, Hausa, Amharic, Twi, Igbo, Xhosa, Lingala, Arabic |
+| **AI voice assistant** | Web Speech API — supports all the above languages for both commands AND live captioning |
+| **Real-time captioning** | Any spoken language → text on screen with zero delay |
+| **Instant scripture** | Local cache + WebSocket push = no delay when calling verses |
+| **Lower-third / Full-screen** | Toggle in settings |
+| **Custom colors** | Primary, accent, text color hex pickers |
+| **Transitions** | Fade, Slide, Zoom, Glow, Bounce — with adjustable speed |
+| **Animations** | CSS keyframe system with 8 animation types |
+| **Font size & alignment** | Slider (12–72px) + text alignment option |
+| **Blue & Green theme** | Default #003366 (navy) + #006633 (green) — exactly as requested |
+| **Background opacity + blur** | Full control |
+| **OBS integration** | Browser source + WebSocket = real-time, no polling |

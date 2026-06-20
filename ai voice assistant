@@ -1,0 +1,248 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Mic, MicOff, Sparkles, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+// Language codes for speech recognition (European + African)
+const SUPPORTED_LANGUAGES = [
+  { code: 'en-US', name: 'English (US)' },
+  { code: 'en-GB', name: 'English (UK)' },
+  { code: 'fr-FR', name: 'Français (France)' },
+  { code: 'fr-CA', name: 'Français (Canada)' },
+  { code: 'pt-PT', name: 'Português (Portugal)' },
+  { code: 'pt-BR', name: 'Português (Brasil)' },
+  { code: 'es-ES', name: 'Español (España)' },
+  { code: 'de-DE', name: 'Deutsch (Deutschland)' },
+  { code: 'it-IT', name: 'Italiano (Italia)' },
+  { code: 'nl-NL', name: 'Nederlands (Nederland)' },
+  { code: 'sw-KE', name: 'Kiswahili (Kenya)' },
+  { code: 'sw-TZ', name: 'Kiswahili (Tanzania)' },
+  { code: 'ha-NG', name: 'Hausa (Nigeria)' },
+  { code: 'yo-NG', name: 'Yorùbá (Nigeria)' },
+  { code: 'ig-NG', name: 'Igbo (Nigeria)' },
+  { code: 'zu-ZA', name: 'isiZulu (South Africa)' },
+  { code: 'xh-ZA', name: 'isiXhosa (South Africa)' },
+  { code: 'am-ET', name: 'አማርኛ (Ethiopia)' },
+  { code: 'ar-SA', name: 'العربية (Saudi Arabia)' },
+  [code:  'kr-kri'name:  'krio              ']
+];
+
+// Command patterns for voice-activated scripture display
+const SCRIPTURE_COMMANDS = [
+  /(?:show|display|read)\s+(?:me\s+)?(?:the\s+)?(?:scripture|verse|bible)\s+(.+)/i,
+  /(?:show|display|open)\s+(.+?)(?:\s+(?:chapter|verse|passage))?$/i,
+  /(?:John|Genesis|Psalm|Psalms|Proverbs|Matthew|Mark|Luke|Romans|Revelation|1\s*Cor|2\s*Cor|Galatians|Ephesians|Philippians|Colossians|Hebrews)\s+\d+:\d+/i,
+];
+
+// Also handle direct quote detection for captioning
+const CAPTION_TRIGGERS = [
+  /^caption\s+(.+)/i,
+  /^write\s+(.+)/i,
+  /^show\s+(.+)/i,
+];
+
+export function AIAssistant({ onTranscript, onCommand, wsRef }) {
+  const [isListening, setIsListening] = useState(false);
+  const [interimText, setInterimText] = useState('');
+  const [finalText, setFinalText] = useState('');
+  const [selectedLang, setSelectedLang] = useState('en-US');
+  const [showLangPicker, setShowLangPicker] = useState(false);
+  const recognitionRef = useRef(null);
+  const finalTranscriptRef = useRef('');
+  const lastCommandTime = useRef(0);
+
+  const processCommand = useCallback((text) => {
+    const now = Date.now();
+    if (now - lastCommandTime.current < 2000) return false; // debounce
+    lastCommandTime.current = now;
+
+    // Check for direct scripture reference
+    for (const pattern of SCRIPTURE_COMMANDS) {
+      const match = text.match(pattern);
+      if (match) {
+        const ref = match[1] || match[0];
+        const cleanRef = ref.replace(/^(?:show|display|read|open|me|the|scripture|verse|bible|chapter|passage)\s+/gi, '').trim();
+        
+        // Validate it looks like a scripture reference
+        if (/\d?\s*[A-Za-z]+\s+\d+:\d+/.test(cleanRef) || /(?:John|Psalm|Genesis|Matthew|Revelation)\s+\d+:\d+/i.test(cleanRef)) {
+          onCommand('SHOW_SCRIPTURE', { reference: cleanRef });
+          return true;
+        }
+      }
+    }
+
+    // Check for hide command
+    if (/^(?:hide|clear|remove|close)\s+(?:overlay|screen|display)/i.test(text)) {
+      onCommand('HIDE_OVERLAY', {});
+      return true;
+    }
+
+    return false;
+  }, [onCommand]);
+
+  const startListening = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = selectedLang;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+          finalTranscriptRef.current += ' ' + transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      setInterimText(interim);
+      
+      if (final) {
+        // Try to process as command first
+        const isCommand = processCommand(final);
+        
+        // If not a command, send as caption/live transcript
+        if (!isCommand && onTranscript) {
+          onTranscript(final);
+        }
+        
+        // Keep final text for display
+        const combined = finalTranscriptRef.current;
+        if (combined.length > 500) {
+          finalTranscriptRef.current = combined.slice(-300);
+        }
+        setFinalText(finalTranscriptRef.current);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        setIsListening(false);
+      }
+    };
+
+    recognition.onend = () => {
+      // Auto-restart if we're still supposed to be listening
+      if (isListening) {
+        try { recognition.start(); } catch (e) { /* ignore */ }
+      }
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [selectedLang, onTranscript, processCommand, isListening]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
+      }
+    };
+  }, []);
+
+  // Language selection triggers restart
+  useEffect(() => {
+    if (isListening) {
+      stopListening();
+      setTimeout(() => startListening(), 300);
+    }
+  }, [selectedLang]);
+
+  return (
+    <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-yellow-400" />
+          <span className="text-sm font-semibold text-white">AI Assistant</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {isListening && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-[10px] text-green-300 uppercase tracking-wider">Live</span>
+            </div>
+          )}
+          <button
+            onClick={() => setShowLangPicker(!showLangPicker)}
+            className="text-[10px] text-blue-300 hover:text-white uppercase tracking-wider px-2 py-0.5 rounded border border-white/20 hover:bg-white/10"
+          >
+            {selectedLang.split('-')[0]}
+          </button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`w-8 h-8 p-0 rounded-full ${
+              isListening 
+                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                : 'text-white/60 hover:text-white hover:bg-white/10'
+            }`}
+            onClick={toggleListening}
+          >
+            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </Button>
+        </div>
+      </div>
+
+      {showLangPicker && (
+        <div className="mb-3 max-h-32 overflow-y-auto space-y-0.5">
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              className={`w-full text-left text-xs px-2 py-1 rounded ${
+                selectedLang === lang.code 
+                  ? 'bg-blue-500/30 text-white' 
+                  : 'text-blue-200 hover:bg-white/10 hover:text-white'
+              }`}
+              onClick={() => { setSelectedLang(lang.code); setShowLangPicker(false); }}
+            >
+              {lang.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Voice commands hint */}
+      <div className="text-[10px] text-blue-300/60 leading-relaxed">
+        Say: <span className="text-blue-200">"Show John 3:16"</span> or <span className="text-blue-200">"Hide overlay"</span>
+      </div>
+      
+      {/* Live transcript preview */}
+      {interimText && (
+        <div className="mt-2 p-2 bg-black/30 rounded text-xs text-white/70 italic">
+          {interimText}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,27 @@
+{
+  "name": "obs-overlay-pro",
+  "version": "2.0.0",
+  "description": "OBS Overlay Pro Suite - Multilingual Scripture, Lyrics & AI Captioning",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "server": "node server/index.js",
+    "start": "concurrently \"npm run server\" \"npm run dev\""
+  },
+  "dependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "lucide-react": "^0.400.0",
+    "ws": "^8.16.0",
+    "express": "^4.19.0",
+    "sonner": "^1.5.0",
+    "clsx": "^2.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^5.4.0",
+    "tailwindcss": "^3.4.0",
+    "concurrently": "^8.2.0"
+  }
+}

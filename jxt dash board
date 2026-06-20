@@ -1,0 +1,60 @@
+// Add to imports at the top of Dashboard.jsx
+import { useEffect } from 'react';
+import { connectWebSocket, sendMessage, showOverlay, hideOverlay, showScripture, showSong } from '@/lib/websocket';
+
+// Add inside the Dashboard component, after the existing state declarations:
+const [wsConnected, setWsConnected] = useState(false);
+const [selectedVersion, setSelectedVersion] = useState('KJV');
+
+useEffect(() => {
+  const cleanup = connectWebSocket(
+    (state) => {
+      setWsConnected(true);
+      // Optionally sync local state with server state
+    },
+    (caption) => {
+      // Live caption received - could show indicator
+    }
+  );
+  return () => cleanup?.();
+}, []);
+
+// Replace the existing handleShowScripture:
+const handleShowScripture = (reference) => {
+  showScripture(selectedVersion, reference);
+  toast.success(`Displaying ${reference}`);
+};
+
+// Replace handleShowSong:
+const handleShowSong = () => {
+  if (!songLyrics) return;
+  showSong(songTitle, songLyrics);
+  toast.success(`Displaying song: ${songTitle || 'Lyrics'}`);
+};
+
+// Replace handleToggleVisibility:
+const handleToggleVisibility = () => {
+  if (state.isVisible) {
+    hideOverlay();
+  } else {
+    // Re-show with current content
+    showOverlay(state.content);
+  }
+  updateState((prev) => ({ ...prev, isVisible: !prev.isVisible }));
+};
+
+// Replace handleClear:
+const handleClear = () => {
+  hideOverlay();
+  updateState((prev) => ({ ...prev, isVisible: false, content: null }));
+};
+
+// Replace handleUpdateSettings with WebSocket sync:
+const handleUpdateSettings = (key, value) => {
+  updateState((prev) => {
+    const newSettings = { ...prev.settings, [key]: value };
+    // Send to server which broadcasts to overlay
+    sendMessage('UPDATE_SETTINGS', newSettings);
+    return { ...prev, settings: newSettings };
+  });
+};

@@ -1,0 +1,205 @@
+import React, { useEffect, useRef, useState } from 'react';
+
+const TRANSITION_STYLES = {
+  none: { enter: 'opacity-100', exit: 'opacity-0' },
+  fade: { enter: 'animate-fade-in', exit: 'animate-fade-out' },
+  slide: { enter: 'animate-slide-up', exit: 'animate-slide-down' },
+  zoom: { enter: 'animate-zoom-in', exit: 'animate-zoom-out' },
+  // Additional custom animations
+  slideLeft: { enter: 'animate-slide-left', exit: 'animate-slide-right' },
+  bounce: { enter: 'animate-bounce-in', exit: 'animate-bounce-out' },
+  glow: { enter: 'animate-glow-in', exit: 'animate-glow-out' },
+  typewriter: { enter: 'animate-typewriter', exit: 'animate-fade-out' },
+};
+
+export function OverlayRenderer({ state, onReady }) {
+  const [animState, setAnimState] = useState('idle'); // idle | entering | visible | exiting
+  const [displayContent, setDisplayContent] = useState(null);
+  const [captionText, setCaptionText] = useState('');
+  const containerRef = useRef(null);
+  const prevContentRef = useRef(null);
+  const captionQueueRef = useRef([]);
+  const typingRef = useRef(null);
+
+  const { isVisible, content, settings } = state;
+
+  // Handle content changes with transitions
+  useEffect(() => {
+    if (!isVisible) {
+      if (animState === 'visible') {
+        setAnimState('exiting');
+        setTimeout(() => {
+          setDisplayContent(null);
+          setAnimState('idle');
+        }, settings.animationSpeed || 400);
+      }
+      return;
+    }
+
+    if (content && JSON.stringify(content) !== JSON.stringify(prevContentRef.current)) {
+      prevContentRef.current = content;
+      
+      if (animState === 'visible') {
+        // Exit current, then enter new
+        setAnimState('exiting');
+        setTimeout(() => {
+          setDisplayContent(content);
+          setAnimState('entering');
+          setTimeout(() => setAnimState('visible'), 200);
+        }, settings.animationSpeed || 400);
+      } else {
+        setDisplayContent(content);
+        setAnimState('entering');
+        setTimeout(() => setAnimState('visible'), 200);
+      }
+    }
+  }, [content, isVisible, settings.animationSpeed]);
+
+  // Handle live caption text (streaming from AI)
+  useEffect(() => {
+    if (!state.liveCaption) return;
+    const { text, isFinal } = state.liveCaption;
+    
+    if (isFinal) {
+      captionQueueRef.current.push(text);
+      if (captionQueueRef.current.length > 3) {
+        captionQueueRef.current.shift();
+      }
+      setCaptionText(captionQueueRef.current.join(' '));
+    } else {
+      // Show interim text
+      const prev = captionQueueRef.current.join(' ');
+      setCaptionText(prev ? `${prev} ${text}` : text);
+    }
+  }, [state.liveCaption]);
+
+  // Typewriter effect for scripture verses
+  useEffect(() => {
+    if (typingRef.current) {
+      clearInterval(typingRef.current);
+      typingRef.current = null;
+    }
+
+    if (displayContent?.type === 'scripture' && settings.transition === 'typewriter') {
+      const fullText = displayContent.text;
+      let idx = 0;
+      const el = containerRef.current?.querySelector('.scripture-text');
+      if (el) {
+        el.textContent = '';
+        typingRef.current = setInterval(() => {
+          if (idx < fullText.length) {
+            el.textContent += fullText[idx];
+            idx++;
+          } else {
+            clearInterval(typingRef.current);
+            typingRef.current = null;
+          }
+        }, 30);
+      }
+    }
+
+    return () => {
+      if (typingRef.current) clearInterval(typingRef.current);
+    };
+  }, [displayContent, settings.transition]);
+
+  const transitionClass = TRANSITION_STYLES[settings.transition] || TRANSITION_STYLES.fade;
+  const currentAnimClass = 
+    animState === 'entering' ? transitionClass.enter :
+    animState === 'exiting' ? transitionClass.exit :
+    animState === 'visible' ? '' : 'opacity-0';
+
+  if (!isVisible || !displayContent) {
+    return (
+      <div className="w-screen h-screen bg-transparent" />
+    );
+  }
+
+  const layoutClass = settings.layout === 'full-screen' 
+    ? 'w-full h-full flex items-center justify-center'
+    : 'absolute bottom-0 left-0 right-0';
+
+  const containerStyle = {
+    '--primary': settings.primaryColor || '#003366',
+    '--secondary': settings.secondaryColor || '#006633',
+    '--text-color': settings.textColor || '#ffffff',
+    '--bg-color': settings.backgroundColor || '#000000',
+    '--opacity': settings.opacity || 0.85,
+    '--font-size': `${settings.fontSize || 36}px`,
+    '--font-family': settings.fontFamily || "'Inter', 'Noto Sans', 'Noto Sans Arabic', sans-serif",
+    '--anim-speed': `${settings.animationSpeed || 400}ms`,
+    '--text-align': settings.textAlign || 'center',
+    '--blur': settings.backgroundBlur ? `${settings.backgroundBlur}px` : '0px',
+  };
+
+  return (
+    <div 
+      ref={containerRef}
+      className={`overlay-container ${layoutClass} ${currentAnimClass}`}
+      style={containerStyle}
+    >
+      {/* Background layer */}
+      <div 
+        className="overlay-backdrop"
+        style={{
+          backgroundColor: `rgba(0, 0, 0, ${settings.opacity})`,
+          backdropFilter: settings.backgroundBlur ? `blur(${settings.backgroundBlur}px)` : 'none',
+        }}
+      />
+
+      {/* Content layer */}
+      <div className="overlay-content">
+        {/* Caption (always shown if captions exist) */}
+        {captionText && (
+          <div className="caption-container" lang={state.liveCaption?.language || 'en'}>
+            <div className="caption-text">
+              {captionText}
+            </div>
+          </div>
+        )}
+
+        {/* Scripture */}
+        {displayContent.type === 'scripture' && (
+          <div className="scripture-container">
+            <div className="scripture-verse-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" strokeWidth="2"/>
+                <path d="M8 7h8M8 11h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <blockquote className="scripture-text">
+              {displayContent.text}
+            </blockquote>
+            {settings.showVerseRef !== false && (
+              <div className="scripture-reference">
+                <span className="reference-divider" />
+                {displayContent.reference}
+                {displayContent.version && (
+                  <span className="version-label">{displayContent.version}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Song Lyrics */}
+        {displayContent.type === 'song' && (
+          <div className="song-container">
+            {displayContent.title && (
+              <div className="song-title">{displayContent.title}</div>
+            )}
+            <div className="song-lyrics">{displayContent.text}</div>
+          </div>
+        )}
+
+        {/* Plain Caption */}
+        {displayContent.type === 'caption' && !captionText && (
+          <div className="caption-container standalone">
+            <div className="caption-text">{displayContent.text}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
